@@ -32,9 +32,8 @@ AX è la parte bassa (16 bit) di EAX.
 AL e AH sono le due metà di AX: byte basso (Least Significant Byte), e byte alto  (Most Significant Byte).
 
 ### Esempio
-EAX:  31 ----------- 16 ----------- 8 ----------- 0
-      [  ---- AH ----  ]           [ ---- AL ---- ]  → 32 bit totali
-
+EAX:  31 -----AH---- 16 ----------- 8 ----AL----- 0 → 32 bit totali
+     
 
 ---
 
