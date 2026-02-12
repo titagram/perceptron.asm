@@ -2,74 +2,59 @@
 
 Questo progetto implementa un semplice **percettrone binario** in linguaggio assembly NASM (32-bit), come esercizio didattico per comprendere i concetti fondamentali delle reti neurali artificiali a basso livello.
 
----
+## Funzionalità
 
-## Funzionamento
+- Implementa la logica di un singolo neurone (percettrone).
+- Esegue un loop su una tabella di verità di 4 input: (0,0), (0,1), (1,0), (1,1).
+- Attualmente configurato per simulare una porta logica **OR**.
+- Stampa l'input e l'output calcolato per ogni caso.
 
-Il percettrone prende in input due valori binari (`x1` e `x2`) e calcola: output = step(x1 * w1 + x2 * w2 + bias)
+## Requisiti
 
-Dove `w1` e `w2` sono i pesi, e `bias` è un valore costante che influenza l'attivazione.
+- **NASM** (Netwide Assembler)
+- **GCC** (con supporto multilib per compilazione a 32-bit su sistemi a 64-bit: `gcc-multilib` su Linux)
+- **Make** (opzionale, per semplificare la compilazione)
 
-La **funzione di attivazione** è una semplice funzione "step":
-- Se la somma è **maggiore o uguale a 0**, il `output` è 1
-- Altrimenti, l' `output` è 0
+## Compilazione ed Esecuzione
 
----
+È incluso un `Makefile` per facilitare la compilazione.
 
-## Registri x86 principali
+### Linux
 
-| Registro | Descrizione                          |
-|----------|--------------------------------------|
-| `EAX`    | Accumulatore principale              |
-| `EBX`    | Registro base                        |
-| `ECX`    | Contatore per loop                   |
-| `EDX`    | Estensione aritmetica (es. divisioni)|
-| `ESP`    | Stack Pointer                        |
-| `EBP`    | Base Pointer                         |
+```bash
+make linux
+./perceptron
+```
 
-Sono registri a 32 bit.
-AX è la parte bassa (16 bit) di EAX.
-AL e AH sono le due metà di AX: byte basso (Least Significant Byte), e byte alto  (Most Significant Byte).
+Se sei su un sistema a 64-bit, assicurati di avere `gcc-multilib` installato:
+`sudo apt-get install gcc-multilib`
 
-### Esempio
-EAX:  31 -----AH---- 16 ----------- 8 ----AL----- 0 → 32 bit totali
-     
+### Windows (MinGW/Cygwin)
 
----
+```bash
+make win
+perceptron.exe
+```
 
-## Istruzioni Assembly Utilizzate
+## Struttura del Codice
 
-### Spostamento dati
-mov eax, 5        ; Carica 5 in EAX
-mov al, [x1]      ; Carica il valore da memoria
+Il file principale è `main.asm`.
+- Sezione `.data`: Contiene i pesi (`w1`, `w2`), il bias, e la tabella degli input.
+- Sezione `.text`: Contiene il ciclo principale che itera sugli input, calcola la somma pesata e applica la funzione di attivazione (step).
+- Output: Utilizza `printf` dalla libreria standard C per mostrare i risultati.
 
-### Aritmetica
-add eax, ebx      ; Somma
-sub eax, 1        ; Sottrazione
-imul eax, ebx     ; Moltiplicazione con segno
+### Verifica Python
 
-### Confronti e salti condizionati
-cmp eax, 0        ; Confronto
-jl negativo       ; Salta se minore (jump if less)
-je uguale         ; Salta se uguale
-jmp fine          ; Salto incondizionato
+È incluso uno script Python `simulate.py` per verificare la logica del percettrone.
+Puoi eseguirlo con:
+```bash
+python3 simulate.py
+```
 
-### Stack
-push eax          ; Inserisce eax nello stack
-pop eax           ; Recupera da stack
+## Logica (Esempio OR)
 
-### I/O tramite C standard library
-extern printf
-push eax
-push msg
-call printf
-add esp, 8        ; Pulisce lo stack
-
-## Struttura del Programma NASM
-.data: Dati inizializzati (input, pesi, bias, messaggi)
-.bss: Dati non inizializzati (buffer temporanei)
-.text: Codice eseguibile
-
-## Compilazione
-nasm -f win32 percettrone.asm -o percettrone.obj
-gcc -m32 -o percettrone percettrone.obj
+Con pesi `w1=1`, `w2=1` e `bias=-1`:
+- (0,0) -> 0*1 + 0*1 - 1 = -1 (<0) -> Output: 0
+- (0,1) -> 0*1 + 1*1 - 1 =  0 (>=0) -> Output: 1
+- (1,0) -> 1*1 + 0*1 - 1 =  0 (>=0) -> Output: 1
+- (1,1) -> 1*1 + 1*1 - 1 =  1 (>=0) -> Output: 1
